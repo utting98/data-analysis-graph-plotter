@@ -151,15 +151,15 @@ def powerplot(xvals, yvals, error, power, xtitle, ytitle, plottitle, outfilepath
     plt.tight_layout() #ensure graph labels do not overlap
     plt.show() #display the graphs
     plottitle = plottitle.replace(' ','') #remove spaces from the title string for naming the file
+    if(outfilepath!=''): #if a path was specified save it to that with as the plottitle.png
+        titlestring = outfilepath+'/'+plottitle+'.png'
+    else: #if no path was specified save it to the current directory of the code as plottitle.png
+        titlestring = plottitle+'.png'
     try: #try and save the file to the output path specified
-        if(outpath!=''): #if a path was specified save it to that with as the plottitle.png
-            titlestring = outpath+'/'+plottitle+'.png'
-        else: #if no path was specified save it to the current directory of the code as plottitle.png
-            titlestring = './' + plottitle+'.png'
         fig1.savefig(titlestring, bbox_inches="tight")
     except: #if the specified output path does not exist then warn the user and inform them it will save to the directory of the code
-        errorwarning('Error:\nOutput directory not found, graph will be saved to the same directory as this code by default when this window is closed.\nCheck to see if you made a typo when specifying the output path.')
-        titlestring = './' + plottitle+'.png'
+        errorwarning('Error:\nOutput directory not found, graph will attempt to be saved to the same directory as this code by default when this window is closed.\nCheck to see if you made a typo when specifying the output path.')
+        titlestring = plottitle+'.png'
         fig1.savefig(titlestring, bbox_inches="tight")
 
 #callback function to open a link in the default web browser
@@ -523,16 +523,15 @@ def plot(dirpath,method,power,gradords,eqn,params,guess,xlabel,ylabel,graphtitle
             labelrow+=1 #increase the next row value by one
         
         plottitle = title.replace(' ','') #replace spaces in the title with nothing to make file title
-        
+        if(outpath!=''):
+            titlestring = outpath+'/'+plottitle+'.png'
+        else:
+            titlestring = plottitle+'.png'
         try: #if the outfile path has been specified try and save the figure to it
-            if(outpath!=''):
-                titlestring = outpath+'/'+plottitle+'.png'
-            else:
-                titlestring = './' + plottitle+'.png'
             fig1.savefig(titlestring, bbox_inches="tight")
         except: #if the outfile path has failed inform the user that it could not find it so the graph will be saved to the direcotry of the code
-            errorwarning('Error:\nOutput directory not found, graph will be saved to the same directory as this code by default when this window is closed.\nCheck to see if you made a typo when specifying the output path.')
-            titlestring = './' + plottitle+'.png'
+            errorwarning('Error:\nOutput directory not found, graph will attempt to be saved to the same directory as this code by default when this window is closed.\nCheck to see if you made a typo when specifying the output path.')
+            titlestring = plottitle+'.png'
             fig1.savefig(titlestring, bbox_inches="tight")
 
 #works as scrollfunc2 above
