@@ -389,6 +389,18 @@ def plot(dirpath,method,power,gradords,eqn,params,guess,xlabel,ylabel,graphtitle
                 return
         
         file.close() #close the file
+        
+        if(len(x)!=len(y) or len(y)!=len(err) or len(x)!=len(err)): #check if the same number is given for x, y and err values
+            errorwarning("Error:\nYour data points are not all the same length.\nThis means that either your x data, y data or errors data does not have the same number of points as the other.\nLength of x data: %s\nLength of y data: %s\nLength of errors data: %s\nPlease adjust your input file accordingly before trying to plot." % (str(len(x)),str(len(y)),str(len(err))))
+            return
+        else:
+            pass
+        if(len(x)<5): #check that there is at least 5 data points to plot
+            errorwarning("Error:\nIn order to calculate an accurate fit you need to have at least 5 data points.\nYour data has less than this hence a fit cannot be plotted.\nPlease add more data points to the input file until you have at least 5.")
+            return
+        else:
+            pass
+        
         powerplot(x,y,err,maxpower,xtitle,ytitle,title,outpath,coords) #run the plotting function for the polynomial fitting passing all relevant data
         
     else: #if the plot method is custom law instead
@@ -461,6 +473,17 @@ def plot(dirpath,method,power,gradords,eqn,params,guess,xlabel,ylabel,graphtitle
                 return
         
         file.close() #close the file
+        
+        if(len(x)!=len(y) or len(y)!=len(err) or len(x)!=len(err)): #check if the same number is given for x, y and err values
+            errorwarning("Error:\nYour data points are not all the same length.\nThis means that either your x data, y data or errors data does not have the same number of points as the other.\nLength of x data: %s\nLength of y data: %s\nLength of errors data: %s\nPlease adjust your input file accordingly before trying to plot." % (str(len(x)),str(len(y)),str(len(err))))
+            return
+        else:
+            pass
+        if(len(x)<5): #check that there is at least 5 data points to plot
+            errorwarning("Error:\nIn order to calculate an accurate fit you need to have at least 5 data points.\nYour data has less than this hence a fit cannot be plotted.\nPlease add more data points to the input file until you have at least 5.")
+            return
+        else:
+            pass
         
         #optimise the fit where the new y values are calculated from the fitting function, the x and y values are read from the file and the parameter guesses are specified from the user input
         try:
