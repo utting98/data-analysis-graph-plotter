@@ -58,7 +58,7 @@ def fitting(xvals,*arglist):
     return vallist #return the y values to the optimisation function for comparison
     
 #function to fit and plot a polynomial to the data
-def powerplot(xvals, yvals, error, power, xtitle, ytitle, plottitle, outfilepath, gradpoints):
+def powerplot(xvals, yvals, error, power, xtitle, ytitle, plottitle, outfilepath, gradpoints, mstyle, mcolour, ecolour1, lstyle, msize):
     #this has already been validated to work so float the power
     power  = int(power)
     
@@ -66,7 +66,7 @@ def powerplot(xvals, yvals, error, power, xtitle, ytitle, plottitle, outfilepath
     fig1 = plt.figure(1,figsize=(9,6))
     plt.subplot(211) #add a subplot for fit
     #plot the real data values with error bars and no line with set marker size and colours
-    plt.errorbar(xvals, yvals, yerr = error, ecolor = 'red', linestyle = 'None', marker = 'o', markersize = 3)
+    plt.errorbar(xvals, yvals, yerr = error, color = mcolour, ecolor = ecolour1, linestyle = 'None', marker = mstyle, markersize = msize)
     plt.grid(True) #add a grid
     plt.xlabel(xtitle) #add an x label to the graph from the user input
     plt.ylabel(ytitle) # add a y label to the graph from the user input
@@ -76,7 +76,7 @@ def powerplot(xvals, yvals, error, power, xtitle, ytitle, plottitle, outfilepath
     #calculate a polyfit of the x and y values to whatever order the user has specified and return the parameters and covariance matrix
     p, cov = np.polyfit(xvals, yvals, power, cov = True)
     fitp = np.polyval(p, xvals) #calculate new y values from the x values and the fitting parameters
-    plt.plot(xvals, fitp) #plot the calulated fitting line over the data
+    plt.plot(xvals, fitp, linestyle = lstyle) #plot the calulated fitting line over the data
     
     residuals = (yvals - fitp) #work out a list of residuals
     chi2 = 0 #set initial chi squared as 0
@@ -90,7 +90,7 @@ def powerplot(xvals, yvals, error, power, xtitle, ytitle, plottitle, outfilepath
     plt.subplot(212) #add a subplot for residuals
     y0 = [0]*len(yvals) #create an array of zeroes to draw a line at y=0 across the residual graph
     #plot the residual values with no line and coloured errorbars with distinct marker
-    plt.errorbar(xvals, residuals, yerr = error, ecolor = 'red', linestyle = 'None', marker = 'o', markersize = 3)
+    plt.errorbar(xvals, residuals, yerr = error, color = mcolour, ecolor = ecolour1, linestyle = 'None', marker = mstyle, markersize = msize)
     plt.grid(True) #plot a grid
     plt.plot(xvals,y0) #plot a line through y=0
     plt.title('Residuals') #add a title of residuals
@@ -293,16 +293,71 @@ def customhelp():
 def errorwarning(message):
     errorwin = Tk() #define error window
     errorwin.title('Error') #give window title of error
+    errorwin.attributes("-topmost", True) #make the helpwindow appear on the top level so user sees it
     warninglabel= Label(errorwin,text=message).grid(row=0,column=0) #text to display the passed error message
     okbutton = Button(errorwin,text='Ok',command=lambda: errorwin.destroy()) #ok button that closes the error window
     okbutton.grid(row=1,column=0)
     errorwin.mainloop() #display and loop the error window
 
 #defining plotting function where code gets the user inputs and figures out what plot to do
-def plot(dirpath,method,power,gradords,eqn,params,guess,xlabel,ylabel,graphtitle,outfilepath):
-    global equation, userfittingparams, firstrun, subframe, root, paramsframe
+def plot(dirpath,method,power,gradords,eqn,params,guess,xlabel,ylabel,graphtitle,outfilepath,mstyle,mcolour,ecolour,lstyle,msize):
+    global equation, userfittingparams, firstrun, subframe, root, paramsframe, advancedframe
+    
+    try: #attempt to fetch any advanced mode options 
+        if(advancedframe.grid_slaves(row=1,column=0)!=[]): #check if the advanced mode tab is open or not
+            #get the values of each input
+            mstylestring = mstyle.get()
+            mcolourstring = mcolour.get()
+            ecolourstring = ecolour.get()
+            lstylestring = lstyle.get()
+            if(msize.get()!=''): #if something was inputted for marker size try and float it, else do nothing
+                msizefloat = float(msize.get())
+            else:
+                pass
+            
+        else: #if was left blank revert options to default values
+            mstylestring = 'x'
+            mcolourstring = 'blue'
+            ecolourstring = 'red'
+            lstylestring = '-'
+            msizefloat = 5
+        
+        #check if each variable is blank or not, if blank replace with a default value
+        if(mstylestring==''):
+            mstylestring = 'x'
+        else:
+            pass
+        if(mcolourstring==''):
+            mcolourstring = 'blue'
+        else:
+            pass
+        if(ecolourstring==''):
+            ecolourstring = 'red'
+        else:
+            pass
+        if(lstylestring==''):
+            lstylestring = '-'
+        else:
+            pass
+        if(msizefloat==''):
+            msizefloat = 5
+        else:
+            pass
+    
+    except: #if this failed check if something was entered for marker size
+        if(msize.get()==''): #if nothing entered revert to default value
+            msizefloat = 5
+        else: #if something was entered it wasn't a float so give error and return
+            errorwarning("Error:\nAt least one of your advanced options failed\nPlease check the links provided for the advanced options entered.")
+            return
+    #if speech marks were incorrectly added to any string remove them
+    mstylestring = mstylestring.replace('"','') 
+    mcolourstring = mcolourstring.replace('"','')
+    ecolourstring = ecolourstring.replace('"','')
+    lstylestring = lstylestring.replace('"','')
+    
     #if there are already fitting parameters listed remoce the frame of them to prevent overlap in display
-    if(root.grid_slaves(row=10,column=1)!=[]):
+    if(root.grid_slaves(row=14,column=1)!=[]):
         paramsframe.grid_forget()
     else:
         pass
@@ -335,7 +390,7 @@ def plot(dirpath,method,power,gradords,eqn,params,guess,xlabel,ylabel,graphtitle
             return
     
     if(title==''): #if not title was specified give an error message explaining the problem to the user then return without plotting
-        errorwarning('Error:\nPleas specify a graph title, this will appear above your graph and is what the output file will be named as in your documents.')
+        errorwarning('Error:\nPlease specify a graph title, this will appear above your graph and is what the output file will be named as in your documents.')
         return
     else:
         pass
@@ -401,7 +456,7 @@ def plot(dirpath,method,power,gradords,eqn,params,guess,xlabel,ylabel,graphtitle
         else:
             pass
         
-        powerplot(x,y,err,maxpower,xtitle,ytitle,title,outpath,coords) #run the plotting function for the polynomial fitting passing all relevant data
+        powerplot(x,y,err,maxpower,xtitle,ytitle,title,outpath,coords,mstylestring,mcolourstring,ecolourstring,lstylestring,msizefloat) #run the plotting function for the polynomial fitting passing all relevant data
         
     else: #if the plot method is custom law instead
         
@@ -517,8 +572,8 @@ def plot(dirpath,method,power,gradords,eqn,params,guess,xlabel,ylabel,graphtitle
         
         fig1 = plt.figure(1,figsize=(9,6)) #plot new figure
         plt.subplot(211) #add new subplot to figure
-        plt.errorbar(x,fitting(x,*paramvals)) #plot the fitting line calculated
-        plt.errorbar(x,y,yerr=err,linestyle = 'None') #plot the values with their uncertainties
+        plt.plot(x,fitting(x,*paramvals),linestyle=lstylestring) #plot the fitting line calculated
+        plt.errorbar(x,y,yerr=err,ecolor=ecolourstring,linestyle = 'None',color=mcolourstring,marker=mstylestring,markersize=msizefloat) #plot the values with their uncertainties
         plt.title(title) #Add the title to the plot from specified user input
         plt.xlabel(xtitle) #Add the label to the x axis from specified user input
         plt.ylabel(ytitle) #Add the label to the y axis from specified user input
@@ -526,7 +581,7 @@ def plot(dirpath,method,power,gradords,eqn,params,guess,xlabel,ylabel,graphtitle
         
         plt.subplot(212) #add new subplot to the figure
         r=[0]*len(y) #create list of 0 values for plotting y=0 graph
-        plt.errorbar(x,residuals,yerr = err, linestyle = 'None') #Plot calculated residuals data with no line
+        plt.errorbar(x,residuals,yerr = err, ecolor=ecolourstring, color=mcolourstring, linestyle = 'None',marker=mstylestring,markersize=msizefloat) #Plot calculated residuals data with no line
         plt.plot(x,r) #Plot y=0 line to see distance to residuals
         plt.grid() #Plot a grid on the axes
         plt.title("Residuals") #Add the title to the plot
@@ -560,13 +615,13 @@ def plot(dirpath,method,power,gradords,eqn,params,guess,xlabel,ylabel,graphtitle
 #works as scrollfunc2 above
 def scrollfunc(event):
     global canvas
-    canvas.configure(scrollregion=canvas.bbox("all"),width=400,height=500)
+    canvas.configure(scrollregion=canvas.bbox("all"),width=400,height=350)
 
 #works as canvascreate2 above
 def canvascreate():
     global root, canvas, subframe, paramsframe
     paramsframe = Frame(root)
-    paramsframe.grid(row=12,column=1)
+    paramsframe.grid(row=14,column=1)
     canvas=Canvas(paramsframe)
     subframe=Frame(canvas)
     myscrollbar=Scrollbar(paramsframe,orient="vertical",command=canvas.yview)
@@ -578,6 +633,66 @@ def canvascreate():
     subframe.bind("<Configure>",scrollfunc)
     return
 
+#function for interacting with the advanced mode tab
+def advanced():
+    global advancedframe, subadvancedframe, advancedstring, root, markerstyle, markercolour, errorcolour, linestyle1, markersize1
+    #if the advanced option tab is already open
+    if(advancedframe.grid_slaves(row=1,column=0)!=[]):
+        advancedstring.set("Advanced Styling ▶▶") #display text as tab closed
+        advancedframe.grid_slaves(row=1,column=0)[0].grid_remove() #hide the advanced options
+    #if advanced tab was closed
+    else:
+        advancedstring.set("Advanced Styling ▼▼") #display text as tab opened
+        subadvancedframe = Frame(advancedframe) #add frame for advanced options
+        subadvancedframe.grid(row=1,column=0)
+        
+        #info about using advanced mode
+        infostring = Label(subadvancedframe,text='Please enter options without "speech marks".\nThese are not fully error handled, if plot fails one of your custom options is not a valid input.',relief='solid').grid(row=0,column=0,columnspan=2,sticky='nsew')
+        
+        #display info and give entry for styling markers, links to list of styles in documentation
+        markerstyle = StringVar()
+        markerlabel = Label(subadvancedframe, text='Marker Style: ', fg="blue", cursor="hand2", relief='solid')
+        markerlabel.grid(row=1,column=0,sticky='nsew')
+        markerlabel.bind("<Button-1>", lambda e: callback("https://matplotlib.org/3.1.1/api/markers_api.html#module-matplotlib.markers"))                              
+        
+        markerstyleentry = Entry(subadvancedframe,textvariable=markerstyle,relief='solid')                                                
+        markerstyleentry.grid(row=1,column=1,sticky='nsew')
+                                                          
+        #display info and give entry for marker colours, links to list of colours in documentation
+        markercolour = StringVar()
+        markercolourinfo = Label(subadvancedframe, text='Marker Colour: ', fg="blue", cursor="hand2",relief='solid')
+        markercolourinfo.grid(row=2,column=0,sticky='nsew')
+        markercolourinfo.bind("<Button-1>", lambda e: callback("https://matplotlib.org/2.0.2/api/colors_api.html"))
+        
+        markercolourinfoentry = Entry(subadvancedframe,textvariable=markercolour,relief='solid')                                                
+        markercolourinfoentry.grid(row=2,column=1,sticky='nsew')
+        
+        #display info and give entry for error bar colours, links to list of colours in documentation
+        errorcolour = StringVar()
+        errorcolourinfo = Label(subadvancedframe, text='Error Bar Colour: ', fg="blue", cursor="hand2",relief='solid')
+        errorcolourinfo.grid(row=3,column=0,sticky='nsew')
+        errorcolourinfo.bind("<Button-1>", lambda e: callback("https://matplotlib.org/2.0.2/api/colors_api.html"))
+        
+        errorcolourinfoentry = Entry(subadvancedframe,textvariable=errorcolour,relief='solid')                                                
+        errorcolourinfoentry.grid(row=3,column=1,sticky='nsew')
+        
+        #display info and give entry for line styles, links to list of styles in documentation
+        linestyle1 = StringVar()
+        linestyle = Label(subadvancedframe, text='Line Style: ', fg="blue", cursor="hand2",relief='solid')
+        linestyle.grid(row=4,column=0,sticky='nsew')
+        linestyle.bind("<Button-1>", lambda e: callback("https://matplotlib.org/gallery/lines_bars_and_markers/line_styles_reference.html"))
+        
+        linestyle2 = Entry(subadvancedframe,textvariable=linestyle1,relief='solid')                                                
+        linestyle2.grid(row=4,column=1,sticky='nsew')
+        
+        #display info and give entry for marker size, no documentation for this just takes a float
+        markersize1 = StringVar()
+        markersize = Label(subadvancedframe, text='Marker Size: ', relief='solid')
+        markersize.grid(row=5,column=0,sticky='nsew')
+        
+        markersizeentry = Entry(subadvancedframe,textvariable=markersize1,relief='solid')                                                
+        markersizeentry.grid(row=5,column=1,sticky='nsew')
+        
 #insertion point for the code and definition of the home window
 if(__name__=='__main__'):
     root = Tk() #define root as main window
@@ -669,13 +784,24 @@ if(__name__=='__main__'):
     blanklabel = Label(dataframe,text='').grid(row=6,column=0,columnspan=3,sticky='nsew')
     
     #button that calls the plotting functoin to begin processing data entered labelled plot
-    plotbutton = Button(root, text='Plot',command=lambda: plot(path,v,powervar,gradvar,equationvar,fittingparamsvar,paramsguessvar,xtitlevar,ytitlevar,titlevar,outpath))
+    plotbutton = Button(root, text='Plot',command=lambda: plot(path,v,powervar,gradvar,equationvar,fittingparamsvar,paramsguessvar,xtitlevar,ytitlevar,titlevar,outpath,markerstyle, markercolour, errorcolour, linestyle1, markersize1))
     plotbutton.grid(row=9,column=1,sticky='nsew')
     
     #blank label to increase widget spacing
     blank = Label(root,text='').grid(row=11,column=1,sticky='nsew')
     
+    #add frame for advanced tab
+    advancedframe = Frame(root)
+    advancedframe.grid(row=12,column=1)
+    
+    #add text to display advanced styling options, interactable to show and hide on click
+    advancedstring = StringVar()
+    advancedstring.set("Advanced Styling ▶▶")
+    advancedlabel = Label(advancedframe, textvariable=advancedstring, fg="blue", cursor="hand2")
+    advancedlabel.grid(row=0,column=0)
+    advancedlabel.bind("<Button-1>", lambda a: advanced())
+    
+    blank2 = Label(root,text='').grid(row=13,column=1,sticky='nsew')
+    
     root.update() #update root display
     root.mainloop() #display and loop the root window
-
-
