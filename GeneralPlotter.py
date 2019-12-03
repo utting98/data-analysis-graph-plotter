@@ -615,7 +615,7 @@ def plot(dirpath,method,power,gradords,eqn,params,guess,xlabel,ylabel,graphtitle
 #works as scrollfunc2 above
 def scrollfunc(event):
     global canvas
-    canvas.configure(scrollregion=canvas.bbox("all"),width=400,height=350)
+    canvas.configure(scrollregion=canvas.bbox("all"),width=400,height=300)
 
 #works as canvascreate2 above
 def canvascreate():
