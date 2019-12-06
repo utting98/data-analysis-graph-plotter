@@ -783,6 +783,13 @@ if(__name__=='__main__'):
     #blank label to increase spacing of widgets
     blanklabel = Label(dataframe,text='').grid(row=6,column=0,columnspan=3,sticky='nsew')
     
+    #define early incase advanced menu is never opened
+    markerstyle = StringVar()
+    markercolour = StringVar()
+    errorcolour = StringVar()
+    linestyle1 = StringVar()
+    markersize1 = StringVar()
+    
     #button that calls the plotting functoin to begin processing data entered labelled plot
     plotbutton = Button(root, text='Plot',command=lambda: plot(path,v,powervar,gradvar,equationvar,fittingparamsvar,paramsguessvar,xtitlevar,ytitlevar,titlevar,outpath,markerstyle, markercolour, errorcolour, linestyle1, markersize1))
     plotbutton.grid(row=9,column=1,sticky='nsew')
