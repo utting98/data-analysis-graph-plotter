@@ -621,7 +621,7 @@ def scrollfunc(event):
 def canvascreate():
     global root, canvas, subframe, paramsframe
     paramsframe = Frame(root)
-    paramsframe.grid(row=14,column=1)
+    paramsframe.grid(row=12,column=1)
     canvas=Canvas(paramsframe)
     subframe=Frame(canvas)
     myscrollbar=Scrollbar(paramsframe,orient="vertical",command=canvas.yview)
@@ -698,12 +698,12 @@ if(__name__=='__main__'):
     root = Tk() #define root as main window
     root.title('General Graph Plotter') #set title of root
     #display some information about the code
-    infolabel = Label(root,text='Welcome to the general graph plotter, this software gives you two plotting options: polynomial or custom law.').grid(row=0,column=0,columnspan=3,sticky='nsew')
-    infolabel2 = Label(root,text='The polynomial option will fit data to up to any poisitive integer power of x you choose, it will give the coefficients of each power of x, the y intercept and the reduced chi squared value').grid(row=1,column=0,columnspan=3,sticky='nsew')
-    infolabel3 = Label(root,text='The custom law will allow you to write your own law to try and fit the data to. This can be anything such as trigonometric functions or exponential functions.').grid(row=2,column=0,columnspan=3,sticky='nsew')
-    infolabel4 = Label(root,text='For custom mode you need to pass at least one fitting parameter with guesses of a value. This is because the code will optimise the fit around these parameters to find the best equation of fit.').grid(row=3,column=0,columnspan=3,sticky='nsew')
-    infolabel5 = Label(root,text='To see an example of this mode please select the "Custom Help" button below.').grid(row=4,column=0,columnspan=3)
-    blankspace = Label(root,text='').grid(row=5,column=0,columnspan=3,sticky='nsew') #blank label to increase spacing of widgets
+    infolabel = Label(root,text='Welcome to the general graph plotter, this software gives you two plotting options: polynomial or custom law.').grid(row=0,column=0,columnspan=4,sticky='nsew')
+    infolabel2 = Label(root,text='The polynomial option will fit data to up to any poisitive integer power of x you choose, it will give the coefficients of each power of x, the y intercept and the reduced chi squared value').grid(row=1,column=0,columnspan=4,sticky='nsew')
+    infolabel3 = Label(root,text='The custom law will allow you to write your own law to try and fit the data to. This can be anything such as trigonometric functions or exponential functions.').grid(row=2,column=0,columnspan=4,sticky='nsew')
+    infolabel4 = Label(root,text='For custom mode you need to pass at least one fitting parameter with guesses of a value. This is because the code will optimise the fit around these parameters to find the best equation of fit.').grid(row=3,column=0,columnspan=4,sticky='nsew')
+    infolabel5 = Label(root,text='To see an example of this mode please select the "Custom Help" button below.').grid(row=4,column=0,columnspan=4)
+    blankspace = Label(root,text='').grid(row=5,column=0,columnspan=4,sticky='nsew') #blank label to increase spacing of widgets
     
     dataframe = Frame(root) #create frame in root for datafile entries
     dataframe.grid(row=6,column=1)
@@ -791,17 +791,18 @@ if(__name__=='__main__'):
     blank = Label(root,text='').grid(row=11,column=1,sticky='nsew')
     
     #add frame for advanced tab
-    advancedframe = Frame(root)
-    advancedframe.grid(row=12,column=1)
-    
+    advancedframe = Frame(root,width = 121)
+    advancedframe.grid(row=12,column=2,columnspan=2,sticky='n')
+
     #add text to display advanced styling options, interactable to show and hide on click
     advancedstring = StringVar()
     advancedstring.set("Advanced Styling ▶▶")
     advancedlabel = Label(advancedframe, textvariable=advancedstring, fg="blue", cursor="hand2")
-    advancedlabel.grid(row=0,column=0)
+    advancedlabel.grid(row=0,column=0,columnspan=2,sticky='nsew')
     advancedlabel.bind("<Button-1>", lambda a: advanced())
     
-    blank2 = Label(root,text='').grid(row=13,column=1,sticky='nsew')
+    #blank2 = Label(root,text='').grid(row=13,column=1,sticky='nsew')
     
+    root.grid_columnconfigure(2,minsize=500) ##force a column two width to prevent moving text from open/close advanced options
     root.update() #update root display
     root.mainloop() #display and loop the root window
